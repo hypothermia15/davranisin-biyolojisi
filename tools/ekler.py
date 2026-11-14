@@ -30,6 +30,15 @@ GUNCEL = {
          "arttığı şeklinde yorumluyor (Shaw ve ark. 2025).",
          "Kalıtsallığı yüksek bir bozuklukta birkaç yılda artan sıklık, genlerden çok tanıma ve tanı pratiğindeki değişimi "
          "düşündürür."),
+    
+        ("Gebelikte parasetamol: şemsiye derleme ne dedi?",
+         "Dokuz sistematik derlemeyi (40 çalışma) inceleyen şemsiye derlemede derlemelerin yedisine güven “kritik düzeyde "
+         "düşük”, ikisine “düşük” bulundu. Aile etkenlerini kardeş karşılaştırmasıyla denetleyen iki çalışmada, bütün "
+         "kohortta görülen küçük risk artışı kardeşler arasında kayboldu: otizmde tehlike oranı 0,98, DEHB’de 0,98 ve 1,06. "
+         "Sonuç: eldeki kanıt gebelikte parasetamol kullanımını otizm ya da DEHB’ye açık biçimde bağlamıyor "
+         "(Sheikh ve ark. 2025).",
+         "Gebelikte ağrı kesici kullandığı için kendini suçlayan anneye söylenecek söz belli: kardeş karşılaştırmalarında "
+         "ilişki kayboluyor."),
     ],
     "oturum-3": [
         ("Bükreş, 16. yıl: bakımın niteliği kortekse işliyor",
@@ -62,6 +71,12 @@ GUNCEL = {
          "davranışı riskiyle ilişkiliydi (risk oranı 2,14). Başlangıçtaki toplam ekran süresi sonuçlarla ilişkili değildi "
          "(Xiao ve ark. 2025).",
          "Ekran öyküsünde dakikayı değil kontrol kaybını sor: bırakabiliyor mu, uyku ve okul ne durumda?"),
+        ("Okulda telefon yasağı tek başına yetmiyor",
+         "İngiltere’de 30 ortaokuldan 12–15 yaşındaki 1.227 öğrencide, telefonu kısıtlayan okullarla izin veren okullar "
+         "arasında ruhsal iyilik hâli açısından fark bulunmadı (düzeltilmiş ortalama fark −0,48). Kısıtlayan okullarda okul "
+         "saatlerindeki telefon süresi 0,67 saat, sosyal medya süresi 0,54 saat daha azdı; hafta içi ve hafta sonu toplam "
+         "kullanımda fark yoktu (Goodyear ve ark. 2025). Çalışma kesitseldir.",
+         "Okul kuralı bir başlangıç; asıl kullanım okul dışında. Aileyle akşam ve gece kullanımını konuş."),
     ],
     "oturum-6": [
         ("Fiziksel ceza davranış sorununu artırıyor",
@@ -70,6 +85,18 @@ GUNCEL = {
          "ilişkiler çocuk ve ebeveyn özelliklerine göre değişmeden tutarlıydı ve doz–yanıt ilişkisine dair bazı kanıtlar vardı "
          "(Heilmann ve ark. 2021).",
          "Davranım sorununda disiplin yöntemlerini ayrıntılı sor; fiziksel cezayı bırakmak tedavinin parçasıdır."),
+        ("Beyin ağları dört yaşta yön değiştiriyor",
+         "0–90 yaş arasındaki 4.216 kişinin difüzyon görüntülemesinde beyin ağlarının örgütlenmesi yaklaşık 9, 32, 66 ve 83 "
+         "yaşlarında yön değiştirdi. Bu dört yaş beş dönemi ayırıyor; 9 ile 32 yaş arasındaki dönem tek bir gelişim yönü "
+         "taşıyor (Mousley ve ark. 2025).",
+         "“Beyin 18’de biter” de “25’te biter” de fazla keskin: olgunlaşma tek bir yaşta değil, uzun bir dönemde tamamlanır. "
+         "Grup verisidir; tek bir gencin kapasitesini göstermez."),
+        ("DEHB ilaçları: tansiyon ve nabız hepsinde izlenir",
+         "102 randomize çalışmanın ağ meta-analizinde (13.315 çocuk ve ergen, 9.387 erişkin) çocuk ve ergenlerde "
+         "metilfenidat sistolik basıncı plaseboya göre ortalama 1,81 mm Hg, atomoksetin nabzı dakikada 5,58 artırdı. "
+         "Uyarıcılar atomoksetin ya da viloksazinden daha büyük artışa yol açmadı; guanfasin ise basıncı ve nabzı düşürdü. "
+         "Çalışmaların ortanca süresi 7 haftaydı; uzun dönem için randomize veri yok (Farhat ve ark. 2025).",
+         "Kan basıncı ve nabzı yalnız uyarıcılarda değil, bütün DEHB ilaçlarında başlangıçta ve izlemde ölç."),
     ],
     "oturum-7": [
         ("Ekran açıkken konuşma azalıyor",
@@ -93,6 +120,13 @@ GUNCEL = {
          "bilişsel bileşik puanda plasebodan farklı değildi (Keefe ve ark. 2025).",
          "Sapolsky’nin 2024’te andığı glutamat yaklaşımı için önemli bir olumsuz sonuç; bilişsel güçlükte psikososyal ve "
          "işlevsel destek yerinde durmalı."),
+        ("Dopaminsiz antipsikotiğin bir yılı",
+         "Ksanomelin–trospiyumun 52 haftalık açık etiketli uzatma çalışmasına, iki faz 3 çalışmayı tamamlayan 366 kişiden "
+         "156’sı girdi; bunların 34’ü (%21,8) bir yılı tamamladı. En sık yan etkiler mide–bağırsak yakınmalarıydı; belirgin "
+         "motor belirti, prolaktin artışı, kilo artışı ya da metabolik bozulma görülmedi. PANSS toplam puanındaki düzelme "
+         "sürdü (Kaul ve ark. 2026). Karşılaştırma kolu yoktu.",
+         "Metabolik yük açısından umut verici, ama çalışmayı bırakanlar çok ve veri erişkinlerden: ergenlerde kullanımına "
+         "ilişkin kanıt henüz yok."),
     ],
     "ek-9": [
         ("Okulda sosyal-duygusal öğrenme",
@@ -133,19 +167,24 @@ EK_KAYNAKLAR = [
     "- Brushe ME, Haag DG, Melhuish EC, Reilly S, Gregory T. Screen Time and Parent-Child Talk When Children Are Aged 12 to 36 Months. JAMA Pediatr. 2024;178(4):369–375. [doi:10.1001/jamapediatrics.2023.6790](https://doi.org/10.1001/jamapediatrics.2023.6790)",
     "- Charlesworth TES, Banaji MR. Patterns of Implicit and Explicit Attitudes: IV. Change and Stability From 2007 to 2020. Psychol Sci. 2022;33(9):1347–1371. [doi:10.1177/09567976221084257](https://doi.org/10.1177/09567976221084257)",
     "- Cipriano C, Strambler MJ, Naples LH, Ha C, Kirk M, Wood M, ve ark. The state of evidence for social and emotional learning: A contemporary meta-analysis of universal school-based SEL interventions. Child Dev. 2023;94(5):1181–1204. [doi:10.1111/cdev.13968](https://doi.org/10.1111/cdev.13968)",
+    "- Farhat LC, Lannes A, Del Giovane C, Parlatini V, Garcia-Argibay M, Ostinelli EG, ve ark. Comparative cardiovascular safety of medications for attention-deficit hyperactivity disorder in children, adolescents, and adults: a systematic review and network meta-analysis. Lancet Psychiatry. 2025;12(5):355–365. [doi:10.1016/S2215-0366(25)00062-8](https://doi.org/10.1016/S2215-0366(25)00062-8)",
+    "- Goodyear VA, Randhawa A, Adab P, Al-Janabi H, Fenton S, Jones K, ve ark. School phone policies and their association with mental wellbeing, phone use, and social media use (SMART Schools): a cross-sectional observational study. Lancet Reg Health Eur. 2025;51:101211. [doi:10.1016/j.lanepe.2025.101211](https://doi.org/10.1016/j.lanepe.2025.101211)",
     "- Grotzinger AD, Werme J, Peyrot WJ, Frei O, de Leeuw C, Bicks LK, ve ark. Mapping the genetic landscape across 14 psychiatric disorders. Nature. 2026;649(8096):406–415. [doi:10.1038/s41586-025-09820-3](https://doi.org/10.1038/s41586-025-09820-3)",
     "- Harris JL, Swanson B, Petersen IT. A Developmentally Informed Systematic Review and Meta-Analysis of the Strength of General Psychopathology in Childhood and Adolescence. Clin Child Fam Psychol Rev. 2024;27(1):130–164. [doi:10.1007/s10567-023-00464-1](https://doi.org/10.1007/s10567-023-00464-1)",
     "- Heilmann A, Mehay A, Watt RG, Kelly Y, Durrant JE, van Turnhout J, ve ark. Physical punishment and child outcomes: a narrative review of prospective studies. Lancet. 2021;398(10297):355–364. [doi:10.1016/S0140-6736(21)00582-1](https://doi.org/10.1016/S0140-6736(21)00582-1)",
     "- Janik A, Qiu X, Lane R, Popova V, Drevets WC, Canuso CM, ve ark. Esketamine Monotherapy in Adults With Treatment-Resistant Depression: A Randomized Clinical Trial. JAMA Psychiatry. 2025;82(9):877–887. [doi:10.1001/jamapsychiatry.2025.1317](https://doi.org/10.1001/jamapsychiatry.2025.1317)",
+    "- Kaul I, Claxton A, Sauder C, Patel T, Chaturvedi S, Brown D, ve ark. Long-Term Safety and Efficacy of Xanomeline and Trospium Chloride in Schizophrenia: A 52-Week Open-Label Extension Trial. Am J Psychiatry. 2026;183(3):183–192. [doi:10.1176/appi.ajp.20241186](https://doi.org/10.1176/appi.ajp.20241186)",
     "- Keefe RSE, Harvey PD, Correll CU, Falkai P, Hashimoto N, Klein H, ve ark. Efficacy and safety of iclepertin for cognitive impairment associated with schizophrenia (CONNEX programme): results from three phase 3 randomised controlled trials. Lancet Psychiatry. 2025;12(12):906–920. [doi:10.1016/S2215-0366(25)00296-2](https://doi.org/10.1016/S2215-0366(25)00296-2)",
     "- Kieling C, Buchweitz C, Caye A, Silvani J, Ameis SH, Brunoni AR, ve ark. Worldwide Prevalence and Disability From Mental Disorders Across Childhood and Adolescence: Evidence From the Global Burden of Disease Study. JAMA Psychiatry. 2024;81(4):347–356. [doi:10.1001/jamapsychiatry.2023.5051](https://doi.org/10.1001/jamapsychiatry.2023.5051)",
     "- Lurie LA, Gruhn MA, Garrisi K, McLaughlin KA, Humphreys KL, Zeanah CH, ve ark. Caregiving Quality and Adolescent Cortical Structure: A 16-Year Longitudinal Study of Institutionally Reared Youth. Dev Sci. 2025;28(5):e70043. [doi:10.1111/desc.70043](https://doi.org/10.1111/desc.70043)",
     "- Madigan S, Deneault AA, Racine N, Park J, Thiemann R, Zhu J, ve ark. Adverse childhood experiences: a meta-analysis of prevalence and moderators among half a million adults in 206 studies. World Psychiatry. 2023;22(3):463–471. [doi:10.1002/wps.21122](https://doi.org/10.1002/wps.21122)",
     "- McDonald AJ, Kurdyak P, Rehm J, Roerecke M, Bondy SJ. Age-dependent association of cannabis use with risk of psychotic disorder. Psychol Med. 2024;54(11):2926–2936. [doi:10.1017/S0033291724000990](https://doi.org/10.1017/S0033291724000990)",
+    "- Mousley A, Bethlehem RAI, Yeh FC, Astle DE. Topological turning points across the human lifespan. Nat Commun. 2025;16(1):10055. [doi:10.1038/s41467-025-65974-8](https://doi.org/10.1038/s41467-025-65974-8)",
     "- Nagata JM, Otmar CD, Shim J, Balasubramanian P, Cheng CM, Li EJ, ve ark. Social Media Use and Depressive Symptoms During Early Adolescence. JAMA Netw Open. 2025;8(5):e2511704. [doi:10.1001/jamanetworkopen.2025.11704](https://doi.org/10.1001/jamanetworkopen.2025.11704)",
     "- Noetel M, Sanders T, Gallardo-Gómez D, Taylor P, Del Pozo Cruz B, van den Hoek D, ve ark. Effect of exercise for depression: systematic review and network meta-analysis of randomised controlled trials. BMJ. 2024;384:e075847. [doi:10.1136/bmj-2023-075847](https://doi.org/10.1136/bmj-2023-075847)",
     "- Sandbank M, Pustejovsky JE, Bottema-Beutel K, Caldwell N, Feldman JI, Crowley LaPoint S, ve ark. Determining Associations Between Intervention Amount and Outcomes for Young Autistic Children: A Meta-Analysis. JAMA Pediatr. 2024;178(8):763–773. [doi:10.1001/jamapediatrics.2024.1832](https://doi.org/10.1001/jamapediatrics.2024.1832)",
     "- Shaw KA, Williams S, Patrick ME, Valencia-Prado M, Durkin MS, Howerton EM, ve ark. Prevalence and Early Identification of Autism Spectrum Disorder Among Children Aged 4 and 8 Years - Autism and Developmental Disabilities Monitoring Network, 16 Sites, United States, 2022. MMWR Surveill Summ. 2025;74(2):1–22. [doi:10.15585/mmwr.ss7402a1](https://doi.org/10.15585/mmwr.ss7402a1)",
+    "- Sheikh J, Allotey J, Sobhy S, Plana MN, Martinez-Barros H, Naidu H, ve ark. Maternal paracetamol (acetaminophen) use during pregnancy and risk of autism spectrum disorder and attention deficit/hyperactivity disorder in offspring: umbrella review of systematic reviews. BMJ. 2025;391:e088141. [doi:10.1136/bmj-2025-088141](https://doi.org/10.1136/bmj-2025-088141)",
     "- Weghuber D, Barrett T, Barrientos-Pérez M, Gies I, Hesse D, Jeppesen OK, ve ark. Once-Weekly Semaglutide in Adolescents with Obesity. N Engl J Med. 2022;387(24):2245–2257. [doi:10.1056/NEJMoa2208601](https://doi.org/10.1056/NEJMoa2208601)",
     "- Xiao Y, Meng Y, Brown TT, Keyes KM, Mann JJ. Addictive Screen Use Trajectories and Suicidal Behaviors, Suicidal Ideation, and Mental Health in US Youths. JAMA. 2025;334(3):219–228. [doi:10.1001/jama.2025.7829](https://doi.org/10.1001/jama.2025.7829)",
 ]
@@ -326,4 +365,41 @@ SIMULASYONLAR = {
     "oturum-2": ["kalitsallik"],
     "oturum-3": ["hamilton"],
     "oturum-5": ["dopamin"],
+}
+
+# Simülasyon kimliği → (denenecekler, düşünme sorusu, yanıt)
+SIM_REHBER = {
+    "esik": (["Kesme puanını 70’ten 67’ye çekin: Ali’ye ne oldu?",
+              "Puanı 60’a indirin, sonra 80’e çıkarın: tanı alanların oranı nasıl değişti?"],
+             "Çizgi yer değiştirdiğinde çocuklarda ne değişti?",
+             "Hiçbir şey. Dağılım da çocuklar da aynı kaldı; yalnızca çizginin yeri değişti. Eşik bir doğa yasası değil, bir "
+             "karar noktasıdır. Eşiğin hemen altındaki belirtiler de aynı etkenlerle ilişkilidir (Larsson ve ark. 2012); "
+             "rapora puanı ve işlevselliği birlikte yazın."),
+    "kisasa": (["Sinyal hatası %0 iken sıralamaya bakın.",
+                "Hatayı %2’ye, sonra %5’e çıkarın: hiç bağışlamayan “kindar” strateji nereye gitti?",
+                "Turnuvayı birkaç kez yeniden oynatın: sıralama ne kadar oynuyor?"],
+               "Küçük bir hata payı hangi stratejileri öne çıkarıyor?",
+               "Hata olmadığında hiç bağışlamayan strateji bu küçük turnuvada iyi puan alabilir. Hamleler arada bir yanlış "
+               "gittiğinde ise tek bir yanlış anlama onu sonsuz bir kavgaya sokar; bağışlayabilen stratejiler öne geçer. Hata "
+               "çok büyüdüğünde stratejiler arasındaki fark küçülür. Klinikteki karşılığı: önce güven, ihanete yanıt ver, özrü "
+               "kabul et (Axelrod ve Hamilton 1981; Stewart ve Plotkin 2013)."),
+    "kalitsallik": (["“Tek tip toprak”tan “Karışık toprak”a geçin: kalıtsallık kaç oldu?",
+                     "Toprak farkını 20 cm’ye çıkarın.",
+                     "“İki ayrı tarla”yı seçin: tarlalar arasındaki fark nereden geliyor?"],
+                    "Genler hiç değişmediği hâlde kalıtsallık neden değişti?",
+                    "Çünkü kalıtsallık bir oran: boy farklarının ne kadarının gen farklarından geldiğini söyler. Çevre "
+                    "çeşitlendikçe genlerin payı küçülür. Kalıtsallık bir nüfusun, bir yerin ve bir zamanın fotoğrafıdır; tek "
+                    "çocuğun tedaviye yanıtını da iki grup arasındaki farkın nedenini de söylemez."),
+    "hamilton": (["Kardeş için kazanç 6, bedel 2: kural sağlanıyor mu?",
+                  "Aynı değerlerle birinci dereceden kuzeni seçin.",
+                  "“Akraba olmayan biri”ni seçin: yardımı ne açıklar?"],
+                 "Akraba olmayan birine yardımı evrim nasıl açıklar?",
+                 "Akraba seçilimi açıklayamaz, çünkü r sıfırdır. Açıklama karşılıklılıktır: tekrarlanan karşılaşmalarda "
+                 "işbirliği kârlıdır (Axelrod ve Hamilton 1981). Unutmayın: evrimsel açıklama ahlaki onay değildir."),
+    "dopamin": (["Olasılığı %0, %50 ve %100 yapın: iki eğri nasıl ayrışıyor?",
+                 "Bekleme sırasındaki etkinliğin en yüksek olduğu noktayı bulun."],
+                "Bildirim sesi bu eğrinin neresinde duruyor?",
+                "Belirsizliğin en yüksek olduğu yerde. Bildirimin önemli mi önemsiz mi olduğu bakana kadar bilinmez; kumar "
+                "makinesi de aynı eğriyi kullanır (Fiorillo ve ark. 2003). Klinikte süreyi değil kontrol kaybını sorun: "
+                "bırakabiliyor mu, uyku ve okul ne durumda?"),
 }

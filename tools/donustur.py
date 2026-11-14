@@ -9,6 +9,7 @@
 - Kendini sına maddeleri tıklanabilir sorulara, mini vaka soruları açılır yanıtlara dönüşür.
 """
 import html
+import json
 import re
 import sys
 import unicodedata
@@ -18,7 +19,8 @@ import markdown
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ekler import EK_KAYNAKLAR, GUNCEL, SIMULASYONLAR, SORULAR  # noqa: E402
+from ekler import EK_KAYNAKLAR, GUNCEL, SIM_REHBER, SIMULASYONLAR, SORULAR  # noqa: E402
+import vakalar as VAK  # noqa: E402
 
 SRC, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 T = SRC.read_text(encoding="utf-8")
@@ -315,6 +317,58 @@ def parse_table(ls):
 CLAIMS = []   # İddia ligi
 
 
+def adim_sar(sid, key, ikon, text, body):
+    """Oturum bölümü: başlığa tıklanınca daralır; kimliği doğrudan bağlantıların hedefidir."""
+    return (f'<section class="adim adim-{key}" id="{sid}" data-adim="{key}" aria-labelledby="{sid}-b">'
+            f'<h3 id="{sid}-b"><span class="adim-ikon" aria-hidden="true">{ikon}</span> '
+            f'<span class="adim-ad">{esc(text)}</span></h3><div class="adim-govde">{body}</div></section>')
+
+
+def hukum_suzgec(keys):
+    """Hüküm işaretine göre süzgeç (oturum içi kart listeleri için)."""
+    say = {}
+    for k in keys:
+        say[k] = say.get(k, 0) + 1
+    if len(say) < 2:
+        return ""
+    out = [f'<button type="button" data-hk="" aria-pressed="true">Tümü <span class="sayi">{len(keys)}</span></button>']
+    for sym, (cls, short, full) in HUKUM.items():
+        if say.get(cls):
+            out.append(f'<button type="button" class="filtre-{cls}" data-hk="{cls}" aria-pressed="false" title="{esc(full)}">'
+                       f'<span aria-hidden="true">{sym}</span> {short} <span class="sayi">{say[cls]}</span></button>')
+    return f'<div class="hk-suz" role="group" aria-label="Hükme göre süz">{"".join(out)}</div>'
+
+
+def render_cards(ls, kind, ctx):
+    """Karşılaştırma tablolarını alt alta kartlara çevirir: her satır tek başına okunur, telefonda yana kaymaz."""
+    head, body = parse_table(ls)
+    items, keys = [], []
+    for r in body:
+        if kind == "crs":
+            items.append(f'<li class="crs-kart" data-ara><h4>{link_all(mdi(r[0]))}</h4>'
+                         f'<p class="crs-bulgu">{link_all(mdi(r[1]))}</p>'
+                         f'<p class="crs-klinik"><span class="guncel-etiket">Klinikte</span> {link_all(mdi(r[2]))}</p></li>')
+            continue
+        k = r[0].replace("\ufe0f", "").strip()
+        cls = HUKUM[k][0]
+        keys.append(cls)
+        if kind == "degisen":
+            items.append(f'<li class="hk" data-hukum="{cls}" data-ara><div class="hk-ust">{badge(r[0])}'
+                         f'<h4>{link_all(mdi(r[1]))}</h4></div>'
+                         f'<p class="hk-ders"><span class="iddia-etiket">2024’te</span> <span>{link_all(mdi(r[2]))}</span></p>'
+                         f'<p class="hk-bugun"><span class="iddia-etiket">Kanıt</span> <span>{link_all(mdi(r[3]))}</span></p></li>')
+            continue
+        ders, bugun = link_all(mdi(r[1])), link_all(mdi(r[2]))
+        CLAIMS.append({"view": ctx["id"], "label": ctx["short"], "hukum": cls, "sym": r[0], "ders": ders, "bugun": bugun,
+                       "seri": "2010" if kind == "derste" else "2024"})
+        items.append(f'<li class="hk" data-hukum="{cls}" data-ara><div class="hk-ust">{badge(r[0])}</div>'
+                     f'<p class="hk-ders"><span class="iddia-etiket">Derste</span> <span>{ders}</span></p>'
+                     f'<p class="hk-bugun"><span class="iddia-etiket">{"Bugün" if kind == "derste" else "Kanıt"}</span> <span>{bugun}</span></p></li>')
+    if kind == "crs":
+        return f'<ol class="crs-liste">{"".join(items)}</ol>'
+    return hukum_suzgec(keys) + f'<ol class="hk-liste">{"".join(items)}</ol>'
+
+
 def render_table(ls, kind, ctx):
     head, body = parse_table(ls)
     verdict_col = kind in ("derste", "kanit", "degisen")
@@ -448,6 +502,10 @@ def r_vaka(ls, ctx, title):
         soru, yanit = (m.group(1), m.group(2)) if m else (q, "")
         out.append(f'<details class="vaka-soru" data-ara><summary>{link_all(mdi(soru), False)}</summary>'
                    f'<div class="vaka-yanit"><p>{link_all(mdi(yanit))}</p></div></details>')
+    dv = next((v for v in VAK.VAKALAR if v["mini"] == ctx["id"]), None)
+    if dv:
+        out.append(f'<p class="vaka-dallan"><a class="dugme dugme-ikincil" href="#/vakalar" data-dv-ac="{dv["id"]}">'
+                   f'<span aria-hidden="true">🎭</span> Bu vakada kararları siz verin</a></p>')
     out.append("</div>")
     return "".join(out)
 
@@ -515,11 +573,10 @@ def render_block(b, ctx):
     elif key in ("derste", "kanit", "crs", "tekrar"):
         pre = [l for l in ls if l.strip() and not l.startswith("|") and not RX_FIG.match(l)]
         figs = [figure(int(RX_FIG.match(l).group(1))) for l in ls if RX_FIG.match(l)]
-        body = ("".join(f'<p class="not">{link_all(mdi(p))}</p>' for p in pre)
-                + render_table(ls, key, ctx) + "".join(figs))
+        tablo = render_table(ls, key, ctx) if key == "tekrar" else render_cards(ls, key, ctx)
+        body = "".join(f'<p class="not">{link_all(mdi(p))}</p>' for p in pre) + tablo + "".join(figs)
     elif key == "degisen":
-        legend = [l for l in ls if l.strip() and not l.startswith("|")]
-        body = "".join(f'<p class="lejant">{mdi(l)}</p>' for l in legend) + render_table(ls, key, ctx)
+        body = render_cards(ls, key, ctx)
     elif key == "vaka":
         vt = re.sub(r"^🩺\s*Mini vaka:\s*", "", title)
         text = "Mini vaka"
@@ -536,8 +593,7 @@ def render_block(b, ctx):
         body = render_generic(ls, ctx)
     sid = f'{ctx["id"]}-{key}'
     ctx["steps"].append((key, short, ikon))
-    return (f'<section class="adim adim-{key}" id="{sid}" aria-labelledby="{sid}-b">'
-            f'<h3 id="{sid}-b"><span class="adim-ikon" aria-hidden="true">{ikon}</span> {esc(text)}</h3>{body}</section>')
+    return adim_sar(sid, key, ikon, text, body)
 
 
 def r_guncel(vid, ctx):
@@ -553,10 +609,9 @@ def r_guncel(vid, ctx):
         arts.append(f'<article class="guncel" data-ara><p class="guncel-yil">{yil}</p><h4>{esc(baslik)}</h4>'
                     f'<p>{link_all(mdi(metin))}</p><p class="guncel-crs"><span class="guncel-etiket">ÇRS için</span> '
                     f'{link_all(mdi(crs))}</p></article>')
-    return (f'<section class="adim adim-guncel" id="{sid}" aria-labelledby="{sid}-b"><h3 id="{sid}-b">'
-            f'<span class="adim-ikon" aria-hidden="true">📰</span> Güncel kanıt</h3>'
-            f'<p class="not">Notlara Kasım 2026’da eklendi. Sayılar PubMed’deki özetlerden alındı; künyeler kaynakçada.</p>'
-            f'<div class="guncel-liste">{"".join(arts)}</div></section>')
+    return adim_sar(sid, "guncel", "📰", "Güncel kanıt",
+                    '<p class="not">Notlara Kasım 2026’da eklendi. Sayılar PubMed’deki özetlerden alındı; künyeler kaynakçada.</p>'
+                    f'<div class="guncel-liste">{"".join(arts)}</div>')
 
 
 HARF = "ABCD"
@@ -568,9 +623,7 @@ def r_test(vid, ctx):
         return ""
     sid = f"{vid}-test"
     ctx["steps"].append(("test", "Vaka soruları", "✍️"))
-    out = [f'<section class="adim adim-test" id="{sid}" aria-labelledby="{sid}-b"><h3 id="{sid}-b">'
-           f'<span class="adim-ikon" aria-hidden="true">✍️</span> Vaka soruları</h3>'
-           f'<p class="sina-ust"><span class="sina-skor" data-test-skor="{vid}" aria-live="polite"></span>'
+    out = [f'<p class="sina-ust"><span class="sina-skor" data-test-skor="{vid}" aria-live="polite"></span>'
            f'<button type="button" class="sina-sifirla" data-test-sifirla="{vid}" hidden>Yanıtları sil</button></p>'
            '<ol class="test">']
     for i, (soru, secenekler, dogru, aciklama, bolum) in enumerate(qs):
@@ -581,8 +634,8 @@ def r_test(vid, ctx):
         out.append(f'<li class="test-madde" data-dogru="{dogru}" data-no="{i}" data-ara><p class="soru">{link_all(mdi(soru), False)}</p>'
                    f'<div class="secenekler" role="group" aria-label="Seçenekler">{btn}</div>'
                    f'<div class="test-aciklama"><p><strong>Doğru yanıt: {HARF[dogru]}.</strong> {link_all(mdi(aciklama))}{git_}</p></div></li>')
-    out.append("</ol></section>")
-    return "".join(out)
+    out.append("</ol>")
+    return adim_sar(sid, "test", "✍️", "Vaka soruları", "".join(out))
 
 
 SIM_META = {
@@ -605,11 +658,17 @@ def r_sim(vid, ctx):
         return ""
     sid = f"{vid}-sim"
     ctx["steps"].append(("sim", "Deneyin", "🧪"))
-    sims = "".join(f'<div class="sim" data-sim="{k}"><h4>{esc(SIM_META[k][0])}</h4>'
-                   f'<p class="sim-aciklama">{link_all(mdi(SIM_META[k][1]))}</p><div class="sim-alan"></div>'
-                   f'<p class="sim-js-yok">Bu etkinlik için tarayıcıda JavaScript açık olmalı.</p></div>' for k in keys)
-    return (f'<section class="adim adim-sim" id="{sid}" aria-labelledby="{sid}-b"><h3 id="{sid}-b">'
-            f'<span class="adim-ikon" aria-hidden="true">🧪</span> Deneyin</h3>{sims}</section>')
+    return adim_sar(sid, "sim", "🧪", "Deneyin", "".join(sim_kutu(k) for k in keys))
+
+
+def sim_kutu(k):
+    gorevler, soru, yanit = SIM_REHBER[k]
+    return (f'<div class="sim" data-sim="{k}" id="sim-{k}"><h4>{esc(SIM_META[k][0])}</h4>'
+            f'<p class="sim-aciklama">{link_all(mdi(SIM_META[k][1]))}</p>'
+            f'<div class="sim-gorev"><p class="sim-etiket">Deneyin</p><ol>{"".join(f"<li>{esc(g)}</li>" for g in gorevler)}</ol></div>'
+            f'<div class="sim-alan"></div><p class="sim-js-yok">Bu etkinlik için tarayıcıda JavaScript açık olmalı.</p>'
+            f'<details class="sim-dusun"><summary><span class="sim-etiket">Ne gördünüz?</span> {esc(soru)}</summary>'
+            f'<p>{link_all(mdi(yanit))}</p></details></div>')
 
 
 DUR = re.compile(r"^\d+ sa \d+ dk$")
@@ -668,21 +727,24 @@ def render_meta(line, ctx):
             extra.append(f'<a href="{DEP2023}" target="_blank" rel="noopener">{esc(p.replace("🆕", "").strip())}</a>')
         else:
             extra.append(esc(p))
-    out = ['<div class="dersler">']
+    out = []
     merged = {}
     for lab, h, pl in rows:
         merged.setdefault(lab, [h, pl])[0] += "" if merged[lab][0] == h else h
     for lab, (h, pl) in merged.items():
         out.append(f'<div class="dersler-satir"><a class="dersler-etiket" href="{pl}" target="_blank" rel="noopener" '
                    f'title="Oynatma listesi (YouTube)">{lab}</a><div class="dersler-cipler">{h}</div></div>')
+    ozet = [f'{h.count("ders-cip")} ders ({lab.split()[0]})' for lab, (h, pl) in merged.items()]
     if dur:
+        ozet.append(" + ".join(dur))
         dur = [("Süre (2010 kaydı): " if "2010 kaydı" in merged else "Süre: ") + " + ".join(dur)]
     info = " · ".join(dur + extra)
     if info:
         out.append(f'<p class="dersler-bilgi">{info}</p>')
-    out.append("</div>")
     ctx["sure"] = dur[0].split(": ", 1)[1] if dur else ""
-    return "".join(out)
+    return (f'<details class="dersler"><summary><span class="dersler-ozet-ad"><span aria-hidden="true">▶</span> Ders kayıtları</span> '
+            f'<span class="dersler-ozet">{esc(" · ".join(ozet))}</span></summary>'
+            f'<div class="dersler-ic">{"".join(out)}</div></details>')
 
 
 # --- Görünümleri kur ---
@@ -716,15 +778,26 @@ def session_view(sec):
             parts.append(r_test(vid, ctx))
     blocks = "".join(parts)
     pre = render_generic(rest, ctx) if rest else ""
-    steps = "".join(f'<a href="#/{vid}/{k}"><span aria-hidden="true">{i}</span> {esc(s)}</a>' for k, s, i in ctx["steps"])
+    steps = "".join(f'<a href="#/{vid}/{k}" data-adim-bag="{k}"><span aria-hidden="true">{i}</span> {esc(s)}</a>'
+                    for k, s, i in ctx["steps"])
+    akilda = next((b for b in sec["blocks"] if b["title"].startswith("🎯")), None)
+    sozcuk = len(re.sub(r"\([^()]*\d{4}[^()]*\)", "", " ".join(l for b in sec["blocks"] for l in b["lines"])).split())
+    dakika = max(5, round(sozcuk * 1.3 / 160))
+    bakista = ""
+    if akilda:
+        maddeler = "".join(f"<li>{link_all(mdi(l[2:]), False)}</li>" for l in akilda["lines"] if l.startswith("- "))
+        bakista = (f'<aside class="bakista" aria-label="Tek bakışta"><p class="bakista-ust"><span class="bakista-ad">Tek bakışta</span>'
+                   f'<span class="bakista-meta">Yaklaşık {dakika} dk okuma · {len(ctx["steps"])} bölüm</span></p>'
+                   f'<ul>{maddeler}</ul></aside>')
     n_fig = sum(1 for l in sum((b["lines"] for b in sec["blocks"]), []) if RX_FIG.match(l))
     n_q = sum(1 for b in sec["blocks"] if b["title"].startswith("✅") for l in b["lines"] if l.startswith("- "))
     head = (f'<header class="oturum-bas"><p class="ust-baslik">{esc(kicker)}</p>'
             f'<h2 tabindex="-1">{esc(title)}</h2>'
             + (f'<p class="slogan">{link_all(mdi(motto), False)}</p>' if motto else "") + meta + "</header>")
-    nav = f'<nav class="adimlar" aria-label="Bu oturumun bölümleri">{steps}</nav>'
+    nav = (f'<nav class="adimlar" aria-label="Bu oturumun bölümleri">{steps}'
+           f'<button type="button" class="adim-hepsi" aria-pressed="false">Tümünü daralt</button></nav>')
     body = (f'<section class="view oturum" id="v-{vid}" data-view="{vid}" data-baslik="{esc(short)}: {esc(title)}" '
-            f'aria-label="{esc(short)}">{head}{nav}{pre}{blocks}'
+            f'aria-label="{esc(short)}">{head}{bakista}{nav}{pre}{blocks}'
             f'<div class="oturum-son"><button type="button" class="okundu" data-okundu="{vid}" aria-pressed="false">'
             f'Bu oturumu okudum</button><nav class="ileri-geri" aria-label="Oturumlar arasında"></nav></div></section>')
     return {"id": vid, "label": short, "title": title, "motto": motto, "html": body, "kind": "oturum" if m else "ek",
@@ -783,7 +856,7 @@ claim_items = "".join(
 iddia_inner = ('<p class="giris-metin">Derslerde geçen iddiaların bugünkü kanıtla karşılaştırması: 2010 kayıtlarındaki '
                '“Derste öyle, bugün böyle” tablolarıyla 2024 serisinin “Kanıt kontrolü” tabloları bir arada. '
                'Süzgeçle bir hüküm türünü seçin; her satır ilgili oturuma bağlanır.</p>'
-               '<div class="tahmin" id="tahmin"><h3><span aria-hidden="true">🎯</span> Tahmin oyunu</h3>'
+               '<div class="tahmin" id="iddialar-tahmin"><h3><span aria-hidden="true">🎯</span> Tahmin oyunu</h3>'
                f'<p>Sapolsky’nin derste söylediği iddiayı okuyun ve bugünkü hükmü tahmin edin: sağlam mı, tartışmalı mı, '
                f'çöktü mü, yoksa olgusal bir düzeltme mi gerekiyor? {len(CLAIMS)} iddia, karışık sırayla.</p>'
                '<div class="tahmin-alan" aria-live="polite"></div>'
@@ -804,27 +877,105 @@ for v in oturumlar + ekler:
                          f'<span>{esc(v["title"])}</span></h3><ul class="akilda akilda-kucuk">{items}</ul></section>')
 N_SINA = sum(1 for s in SECTIONS for b in s["blocks"] if b["title"].startswith("✅") for l in b["lines"] if l.startswith("- "))
 N_TEST = sum(len(v) for v in SORULAR.values())
-tekrar_inner = ('<div class="karisik" id="karisik"><h3><span aria-hidden="true">🎲</span> Karışık test</h3>'
-                '<p>Bütün oturumlardan sorular karışık sırayla. Yanıtınızı verin; açıklama hemen ardından açılır.</p>'
-                '<div class="karisik-alan" aria-live="polite"></div><p class="karisik-dugmeler">'
-                f'<button type="button" class="dugme karisik-basla" data-tur="sina">Doğru mu, yanlış mı? ({N_SINA} ifade)</button> '
-                f'<button type="button" class="dugme dugme-ikincil karisik-basla" data-tur="test">Vaka soruları ({N_TEST} soru)</button>'
-                '</p></div>'
-                '<h3 class="tekrar-baslik"><span aria-hidden="true">🎯</span> Akılda kalsın: oturum oturum</h3>'
-                + "".join(akilda_groups))
-tekrar = simple_view("tekrar", "Hızlı tekrar", "Hızlı tekrar", "Araçlar", tekrar_inner)
-
-# Bilgi kartları
+LT_KUTU = [("Yeniden", "aynı gün"), ("1. kutu", "1 gün"), ("2. kutu", "3 gün"), ("3. kutu", "7 gün"), ("4. kutu", "21 gün")]
 kart_secenek = "".join(f'<option value="{v["id"]}">{esc(v["label"])}: {esc(v["title"])}</option>' for v in oturumlar + ekler)
-kartlar_inner = ('<p class="giris-metin">Her oturumun beş ana fikri birer kart. Kartı çevirin, bildiklerinizi işaretleyin; '
-                 'bilmedikleriniz daha sık karşınıza çıkar. Boşluk tuşu kartı çevirir.</p>'
-                 '<div class="kart-araclar"><label for="kart-suz">Oturum</label><select id="kart-suz">'
-                 f'<option value="">Bütün oturumlar</option>{kart_secenek}</select>'
-                 '<button type="button" class="dugme dugme-ikincil kart-karistir">Karıştır</button>'
-                 '<button type="button" class="sina-sifirla kart-sifirla">Bilinenleri sıfırla</button></div>'
-                 '<div class="kart-sahne" aria-live="polite"></div><p class="kart-ilerleme"></p>'
-                 '<p class="sim-js-yok">Bilgi kartları için tarayıcıda JavaScript açık olmalı.</p>')
-kartlar = simple_view("kartlar", "Bilgi kartları", "Bilgi kartları", "Araçlar", kartlar_inner)
+sim_bag = "".join(f'<li><a href="#/{vid}/sim" data-sim-git="sim-{k}">{esc(SIM_META[k][0])}</a> <span>{esc(next(v["label"] for v in oturumlar + ekler if v["id"] == vid))}</span></li>'
+                  for vid, ks in SIMULASYONLAR.items() for k in ks)
+calis_inner = (
+    '<p class="giris-metin">Bütün alıştırmalar tek yerde. Yanıtladığınız her soru ve işaretlediğiniz her kart aralıklı tekrar '
+    'kutularına girer: bildikleriniz daha seyrek, bilemedikleriniz daha sık karşınıza çıkar.</p>'
+    '<section class="lt-panel" id="calis-tekrar" aria-labelledby="lt-b"><h3 id="lt-b"><span aria-hidden="true">🔁</span> Aralıklı tekrar</h3>'
+    '<p class="lt-bilgi" aria-live="polite"></p><ol class="lt-kutular">'
+    + "".join(f'<li class="lt-kutu lt-k{i}"><span class="lt-ad">{ad}</span><span class="lt-sayi" data-lt-kutu="{i}">0</span>'
+              f'<span class="lt-aralik">{ar}</span></li>' for i, (ad, ar) in enumerate(LT_KUTU))
+    + '</ol><div class="karisik-alan" aria-live="polite"></div><p class="karisik-dugmeler">'
+    '<button type="button" class="dugme karisik-basla" data-tur="vade">Bugünün tekrarı</button> '
+    '<button type="button" class="dugme dugme-ikincil karisik-basla" data-tur="yanlis">Yanlışlarım</button> '
+    f'<button type="button" class="dugme dugme-ikincil karisik-basla" data-tur="sina">Doğru mu, yanlış mı? ({N_SINA})</button> '
+    f'<button type="button" class="dugme dugme-ikincil karisik-basla" data-tur="test">Vaka soruları ({N_TEST})</button> '
+    f'<button type="button" class="dugme dugme-ikincil karisik-basla" data-tur="hepsi">Hepsi karışık ({N_SINA + N_TEST})</button>'
+    '</p><p class="sim-js-yok">Alıştırmalar için tarayıcıda JavaScript açık olmalı.</p></section>'
+    '<section class="calis-bolum" id="calis-kartlar" aria-labelledby="kart-b"><h3 id="kart-b"><span aria-hidden="true">🃏</span> Bilgi kartları</h3>'
+    '<p>Her oturumun beş ana fikri birer kart. Kartı çevirin; bildiklerinizi işaretleyin. Boşluk tuşu kartı çevirir.</p>'
+    '<div class="kart-araclar"><label for="kart-suz">Oturum</label><select id="kart-suz">'
+    f'<option value="">Bütün oturumlar</option>{kart_secenek}</select>'
+    '<button type="button" class="dugme dugme-ikincil kart-karistir">Karıştır</button>'
+    '<button type="button" class="sina-sifirla kart-sifirla">Bilinenleri sıfırla</button></div>'
+    '<div class="kart-sahne" aria-live="polite"></div><p class="kart-ilerleme"></p></section>'
+    '<section class="calis-bolum" id="calis-oyunlar" aria-labelledby="oyun-b"><h3 id="oyun-b"><span aria-hidden="true">🎮</span> Oyunlar ve deneyler</h3>'
+    '<ul class="calis-kartlar">'
+    f'<li><a href="#/vakalar"><span class="ck-ikon" aria-hidden="true">🎭</span><span class="ck-ad">Vaka simülasyonu</span>'
+    f'<span class="ck-alt">{len(VAK.VAKALAR)} dallanan vakada kararları siz verin</span></a></li>'
+    f'<li><a href="#/iddialar/tahmin"><span class="ck-ikon" aria-hidden="true">🎯</span><span class="ck-ad">Tahmin oyunu</span>'
+    f'<span class="ck-alt">{len(CLAIMS)} iddianın bugünkü hükmünü tahmin edin</span></a></li></ul>'
+    f'<p class="calis-etiket">Simülasyonlar</p><ul class="calis-sim">{sim_bag}</ul></section>'
+    '<details class="calis-akilda" id="calis-akilda"><summary><span aria-hidden="true">🎯</span> Akılda kalsın: oturum oturum</summary>'
+    + "".join(akilda_groups) + "</details>")
+calis = simple_view("calis", "Çalış", "Çalış: tekrar, kartlar ve oyunlar", "Araçlar", calis_inner, "Çalış")
+
+# Vaka simülasyonu (dallanan vakalar)
+ETIKETLER = {v["id"]: v["label"] for v in oturumlar + ekler}
+
+
+def dv_dogrula(v):
+    sah = v["sahneler"]
+    assert v["baslangic"] in sah, v["id"]
+    for sid, x in sah.items():
+        if "son" in x:
+            assert x["son"] in ("iyi", "orta", "kotu") and x["baslik"] and x["metin"], (v["id"], sid)
+            continue
+        assert 2 <= len(x["secenekler"]) <= 4, (v["id"], sid)
+        assert max(o[2] for o in x["secenekler"]) == 2, (v["id"], sid)
+        for metin, hedef, puan, gb in x["secenekler"]:
+            assert hedef in sah and puan in VAK.PUAN_ETIKET and metin and gb, (v["id"], sid, hedef)
+    # her sahneye ulaşılır, döngü yoktur
+    gorulen, yol = set(), []
+
+    def gez(sid):
+        assert sid not in yol, ("döngü", v["id"], sid)
+        gorulen.add(sid)
+        if "son" in sah[sid]:
+            return
+        yol.append(sid)
+        for o in sah[sid]["secenekler"]:
+            gez(o[1])
+        yol.pop()
+    gez(v["baslangic"])
+    assert gorulen == set(sah), (v["id"], set(sah) - gorulen)
+
+
+dv_veri, dv_kartlar = [], []
+for v in VAK.VAKALAR:
+    dv_dogrula(v)
+    sahneler = {}
+    for sid, x in v["sahneler"].items():
+        if "son" in x:
+            sahneler[sid] = {"son": x["son"], "baslik": esc(x["baslik"]), "metin": link_all(mdi(x["metin"]))}
+        else:
+            sahneler[sid] = {"metin": link_all(mdi(x["metin"])),
+                             "secenekler": [[link_all(mdi(m), False), h, p, link_all(mdi(g))] for m, h, p, g in x["secenekler"]]}
+    dv_veri.append({"id": v["id"], "baslik": esc(v["baslik"]), "baslangic": v["baslangic"], "sahneler": sahneler,
+                    "sonSayi": sum(1 for x in v["sahneler"].values() if "son" in x),
+                    "oturumlar": [[o, esc(l)] for o, l in v["oturumlar"]]})
+    dv_kartlar.append(f'<li class="dv-kart" data-ara><h3>{esc(v["baslik"])}</h3><p>{esc(v["ozet"])}</p>'
+                      f'<p class="kucuk">İlgili: ' + ", ".join(f'<a href="#/{o}/vaka">{esc(l)}</a>' for o, l in v["oturumlar"][:1])
+                      + f' mini vakası</p><p class="dv-kart-durum kucuk" data-dv-durum="{v["id"]}"></p>'
+                      f'<button type="button" class="dugme" data-dv="{v["id"]}">Vakayı başlat</button></li>')
+dv_json = json.dumps({"puan": {str(k): t for k, t in VAK.PUAN_ETIKET.items()}, "vakalar": dv_veri},
+                     ensure_ascii=False).replace("</", "<\\/")
+N_SAHNE = sum(len(v["sahneler"]) for v in VAK.VAKALAR)
+vaka_inner = (f'<p class="giris-metin">Oturumlardaki mini vakaların {len(VAK.VAKALAR)} tanesinde kararları siz veriyorsunuz. Vaka '
+              'seçtiğiniz yola göre dallanır ve farklı sonlara varır. Her karardan sonra gerekçeyi okuyabilir, istediğiniz karara '
+              'dönüp başka bir yolu deneyebilirsiniz.</p>'
+              '<p class="dv-lejant">' + "".join(f'<span class="sp sp-{"n" if k < 0 else k}">{esc(t)}</span>'
+                                               for k, t in VAK.PUAN_ETIKET.items()) + "</p>"
+              f'<div class="dv" id="dv"><ol class="dv-liste">{"".join(dv_kartlar)}</ol><div class="dv-oyun" hidden></div>'
+              '<p class="sim-js-yok">Vaka simülasyonu için tarayıcıda JavaScript açık olmalı.</p></div>'
+              f'<script type="application/json" id="dv-veri">{dv_json}</script>'
+              '<p class="not">Vakalar kurgusaldır. Sayılar ve atıflar notların kendi içeriğindendir; hukuki bilgiler ikincil '
+              'kaynaklardan aktarılmıştır.</p>')
+vakalar = simple_view("vakalar", "Vaka simülasyonu", "Vaka simülasyonu: kararları siz verin", "Araçlar", vaka_inner,
+                      "Vaka simülasyonu")
 
 # Kaynakça
 kay_inner = [f'<p class="giris-metin">{link_all(mdi(next(l for l in KAY["lead"] if l.strip())), False)}</p>',
@@ -891,15 +1042,18 @@ giris_inner = f"""
   <p class="alt-baslik">Öğrenme notları · çocuk ve ergen psikiyatrisi gözüyle</p>
   <p class="kahraman-metin">{link_all(mdi(lead_p))}</p>
   <p class="kahraman-dugmeler"><a class="dugme" href="#/oturum-1">Oturum 1’den başla <span aria-hidden="true">→</span></a>
-  <a class="dugme dugme-ikincil" href="#/tekrar">Hızlı tekrar</a> <a class="dugme dugme-ikincil" href="#/iddialar">İddia ligi</a>
-  <a class="dugme dugme-ikincil" href="#/kartlar">Bilgi kartları</a></p>
-  <aside class="yeni-not"><strong>Yeni (13 Kasım 2026):</strong> Her oturuma güncel kanıt kutusu ve vaka soruları eklendi;
-  beş simülasyon, bilgi kartları ve iddia tahmin oyunu geldi. Güncel kanıttaki {len(EK_KAYNAKLAR)} çalışmanın künyesi
-  PubMed’den doğrulandı.</aside>
+  <a class="dugme dugme-ikincil" href="#/calis">Çalış</a> <a class="dugme dugme-ikincil" href="#/vakalar">Vaka simülasyonu</a>
+  <a class="dugme dugme-ikincil" href="#/iddialar">İddia ligi</a></p>
+  <p class="devam" hidden><a class="devam-bag" href="#/"><span class="devam-ust">Kaldığınız yerden devam edin</span>
+  <span class="devam-ad"></span></a></p>
+  <aside class="yeni-not"><strong>Yeni (14 Kasım 2026):</strong> Oturum sayfaları sadeleşti: bölümler daraltılabiliyor, tablolar
+  kart oldu, üstteki <b>Aa</b> düğmesiyle yazı boyutu ve tema seçiliyor. Alıştırmalar aralıklı tekrarla “Çalış” sayfasında
+  toplandı; üç mini vaka dallanan simülasyona dönüştü. Güncel kanıt kutularına beş yeni çalışma eklendi
+  ({len(EK_KAYNAKLAR)} çalışma, künyeleri PubMed’den doğrulandı).</aside>
 </div>
 <section class="ilerlemem" id="ilerlemem" hidden aria-labelledby="ilerleme-b"><h2 id="ilerleme-b" class="bolum-baslik">İlerlemem</h2>
 <div class="ilerleme-kutular"></div>
-<p class="kucuk">İlerleme yalnızca bu tarayıcıda saklanır. <button type="button" class="sina-sifirla hepsini-sil">Bütün ilerlemeyi sil</button></p></section>
+<p class="kucuk">İlerleme yalnızca bu tarayıcıda saklanır. Okuma ayarlarınız silinmez. <button type="button" class="sina-sifirla hepsini-sil">Bütün ilerlemeyi sil</button></p></section>
 <section class="kurallar" aria-labelledby="kurallar-b"><h2 id="kurallar-b" class="bolum-baslik">Sapolsky’nin üç kuralı</h2>
 <ol>{"".join(f'<li data-ara><span class="kural-no">{i + 1}</span> {mdi(k)}</li>' for i, k in enumerate(kurallar))}</ol></section>
 {figure(0, "sekil-genis")}
@@ -921,7 +1075,7 @@ giris_inner = f"""
 giris = {"id": "giris", "label": "Giriş", "title": "Davranışın Biyolojisi",
          "html": f'<section class="view aktif" id="v-giris" data-view="giris" data-baslik="Giriş" aria-label="Giriş">{giris_inner}</section>'}
 
-ORDER = [giris] + oturumlar + [kapanis, ek2024] + ekler + [iddialar, kartlar, tekrar, kaynakca]
+ORDER = [giris] + oturumlar + [kapanis, ek2024] + ekler + [calis, vakalar, iddialar, kaynakca]
 
 
 def nav_item(v):
@@ -938,13 +1092,13 @@ nav = (f'<nav class="yan" id="yan" aria-label="Rehber içeriği"><div class="yan
        f'{nav_item(dict(kapanis, num="∞"))}</ol>'
        f'<p class="nav-baslik">Ek · 2024 serisi</p><ol class="nav-liste">{nav_item(dict(ek2024, num="+"))}'
        f'{"".join(nav_item(v) for v in ekler)}</ol>'
-       f'<p class="nav-baslik">Araçlar</p><ol class="nav-liste">{nav_item(dict(iddialar, num="⚖"))}{nav_item(dict(kartlar, num="🃏"))}'
-       f'{nav_item(dict(tekrar, num="🎲"))}{nav_item(dict(kaynakca, num="§"))}</ol>'
+       f'<p class="nav-baslik">Araçlar</p><ol class="nav-liste">{nav_item(dict(calis, num="🔁"))}{nav_item(dict(vakalar, num="🎭"))}'
+       f'{nav_item(dict(iddialar, num="⚖"))}{nav_item(dict(kaynakca, num="§"))}</ol>'
        f'<p class="ilerleme" data-ilerleme></p></div></nav>')
 
 DESC = ("Robert Sapolsky’nin Stanford “Human Behavioral Biology” derslerinden (2010, 2024) çocuk ve ergen psikiyatrisi "
-        "gözüyle hazırlanmış etkileşimli öğrenme notları: 11 oturum, 29 şekil, mini vakalar, kendini sınama soruları ve "
-        "PubMed’den doğrulanmış kaynaklar.")
+        "gözüyle hazırlanmış etkileşimli öğrenme notları: 11 oturum, 29 şekil, dallanan vaka simülasyonları, aralıklı tekrar, "
+        "simülasyonlar ve PubMed’den doğrulanmış kaynaklar.")
 
 page = f"""<!doctype html>
 <html lang="tr">
@@ -976,7 +1130,24 @@ page = f"""<!doctype html>
     <input id="ara" type="search" placeholder="Notlarda ara…" autocomplete="off" aria-controls="ara-sonuc">
     <div class="ara-sonuc" id="ara-sonuc" hidden></div>
   </div>
+  <div class="ayar">
+    <button type="button" class="ayar-dugme" aria-controls="ayar-panel" aria-expanded="false" aria-label="Okuma ayarları">Aa</button>
+    <div class="ayar-panel" id="ayar-panel" hidden>
+      <p class="ayar-ad" id="ayar-yazi-b">Yazı boyutu</p>
+      <div class="ayar-grup" role="group" aria-labelledby="ayar-yazi-b">
+        <button type="button" data-yazi="0" aria-pressed="false">Küçük</button><button type="button" data-yazi="1" aria-pressed="true">Orta</button>
+        <button type="button" data-yazi="2" aria-pressed="false">Büyük</button><button type="button" data-yazi="3" aria-pressed="false">Çok büyük</button></div>
+      <p class="ayar-ad" id="ayar-tema-b">Tema</p>
+      <div class="ayar-grup" role="group" aria-labelledby="ayar-tema-b">
+        <button type="button" data-tema="" aria-pressed="true">Cihaz</button><button type="button" data-tema="acik" aria-pressed="false">Açık</button>
+        <button type="button" data-tema="koyu" aria-pressed="false">Koyu</button></div>
+      <p class="ayar-ad" id="ayar-satir-b">Satır aralığı</p>
+      <div class="ayar-grup" role="group" aria-labelledby="ayar-satir-b">
+        <button type="button" data-satir="0" aria-pressed="true">Olağan</button><button type="button" data-satir="1" aria-pressed="false">Geniş</button></div>
+    </div>
+  </div>
   <button type="button" class="menu-dugme" aria-controls="yan" aria-expanded="false">Bölümler</button>
+  <div class="okuma-cizgi" aria-hidden="true"><span></span></div>
 </header>
 <div class="duzen">
 {nav}
@@ -1009,7 +1180,8 @@ page = f"""<!doctype html>
 """
 (OUT / "index.html").write_text(page, encoding="utf-8")
 n_cite = page.count('class="atif"')
-print(f"{len(ORDER)} görünüm, {len(FIGS)} şekil, {len(REFS)} kaynak, {len(CLAIMS)} iddia, {n_cite} atıf bağlantısı, "
+print(f"{len(ORDER)} görünüm, {len(FIGS)} şekil, {len(REFS)} kaynak, {len(CLAIMS)} iddia, {len(VAK.VAKALAR)} dallanan vaka "
+      f"({N_SAHNE} sahne), {sum(len(x) for x in GUNCEL.values())} güncel kanıt, {n_cite} atıf bağlantısı, "
       f"{page.count('class=\"zd\"')} zaman damgası → {OUT / 'index.html'} ({len(page) // 1024} KB)")
 paren_unmatched = sorted(u for u in UNMATCHED if re.search(r"(ve ark\.|ve [A-Z])", u) or len(u.split()) <= 3)
 if paren_unmatched:
