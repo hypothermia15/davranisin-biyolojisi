@@ -7,21 +7,22 @@ Doç. Dr. Miraç Barış Usta’nın, Robert M. Sapolsky’nin Stanford Ünivers
 ## İçerik
 
 - 2010 kayıtlarının 25 dersi sekiz oturumda, ardından kapanış; Bahar 2024 serisinin farklarını özetleyen ek ve üç ek oturum (şiddet ve panzehirleri, depresyon, dinî inanç ve son ders).
-- Her oturumda yedi adım: beş ana fikir · Sapolsky’nin örnekleri ve bugünkü bilgi · derste öyle, bugün böyle · çocuk ve ergen psikiyatrisi literatürü · mini vaka · kendini sına · akılda kalsın.
-- 29 şekil, 50 iddialık “İddia ligi”, karışık test ve 275 kaynak. Makale künyeleri PubMed üzerinden doğrulanmış, DOI’lerine bağlanmıştır.
-- Kasım 2026 eklemeleri:
-  - her oturumda “Güncel kanıt” kutusu: 2021–2026 tarihli 19 çalışma; sayılar PubMed özetlerinden alındı;
-  - her oturumda üç vaka sorusu (toplam 33), açıklamalı ve ilgili bölüme bağlı;
-  - beş simülasyon: eşik oyunu, kısasa kısas turnuvası, bitki IQ’su (kalıtsallık), Hamilton kuralı, dopamin ve belirsizlik;
-  - 55 bilgi kartı (beş ana fikirlerden), iddia tahmin oyunu ve bir ilerleme paneli;
-  - mini vakalarda önce kendi yanıtınızı yazabileceğiniz bir not alanı.
+- Her oturumda: tek bakışta özeti · beş ana fikir · Sapolsky’nin örnekleri ve bugünkü bilgi · derste öyle, bugün böyle · çocuk ve ergen psikiyatrisi literatürü · güncel kanıt · mini vaka · kendini sına · vaka soruları · akılda kalsın.
+- 29 şekil, 50 iddialık “İddia ligi” ve 280 kaynak. Makale künyeleri PubMed üzerinden doğrulanmış, DOI’lerine bağlanmıştır.
+- Güncel kanıt: 2021–2026 tarihli 24 çalışma; sayılar PubMed özetlerinden alındı. 14 Kasım 2026’da eklenenler: gebelikte parasetamol şemsiye derlemesi, okulda telefon kısıtlaması (SMART Schools), beyin ağlarında dört dönem sınırı, DEHB ilaçlarının kalp-damar etkileri, ksanomelin–trospiyumun 52 haftalık verisi.
+- Çalış sayfası: 24 doğru–yanlış ifadesi, 33 vaka sorusu ve 55 bilgi kartı beş kutulu aralıklı tekrar düzeninde (aynı gün, 1, 3, 7 ve 21 gün); “Bugünün tekrarı” ve “Yanlışlarım” turları.
+- Vaka simülasyonu: üç mini vakanın dallanan sürümü (ensefalit kuşkusu, adli rapor, ilk psikoz). Her karar puanlanır ve gerekçesi açıklanır; vaka seçilen yola göre farklı sonlara varır.
+- Beş simülasyon (eşik oyunu, kısasa kısas turnuvası, bitki IQ’su, Hamilton kuralı, dopamin ve belirsizlik): her birinde denenecekler listesi ve bir düşünme sorusu.
+- İddia tahmin oyunu, mini vakalarda not alanı ve bir ilerleme paneli.
 
 ## Kullanım
 
 - Ders zaman damgaları (▶ Ders 01 [00:25:35], ▶ 2024/23 [1:04]) YouTube’daki kaydı o dakikadan açar.
 - Bir atfa tıklayınca künyesi açılır; “Şekil N” bağlantıları şekli büyütür.
-- “Kendini sına” ve vaka sorusu yanıtları, bilinen kartlar, vaka notları ve okundu işaretleri yalnızca kullanıcının tarayıcısında saklanır.
-- `/` tuşu aramaya odaklanır. Doğrudan bağlantı örnekleri: `#/oturum-3`, `#/oturum-3/vaka`, `#/oturum-1/sim`, `#/iddialar`, `#/kartlar`, `#/tekrar`, `#/kaynakca`.
+- Bölüm başlıklarındaki ok bölümü daraltır; üstteki “Aa” düğmesi yazı boyutunu, temayı (cihaz, açık, koyu) ve satır aralığını ayarlar.
+- Tablolar kart olarak gösterilir; “Derste öyle, bugün böyle” kartları hüküm işaretine göre süzülebilir.
+- Yanıtlar, tekrar kutuları, simülasyon sonuçları, vaka notları, okundu işaretleri ve okuma ayarları yalnızca kullanıcının tarayıcısında saklanır. Önceki sürümde kaydedilen yanıtlar korunur ve tekrar kutularına taşınır.
+- `/` tuşu aramaya odaklanır. Doğrudan bağlantı örnekleri: `#/oturum-3`, `#/oturum-3/vaka`, `#/oturum-1/sim`, `#/calis`, `#/calis/kartlar`, `#/vakalar`, `#/iddialar`, `#/iddialar/tahmin`, `#/kaynakca`. Eski `#/kartlar` ve `#/tekrar` adresleri “Çalış” sayfasına yönlenir.
 
 ## Dosyalar
 
@@ -31,7 +32,8 @@ Doç. Dr. Miraç Barış Usta’nın, Robert M. Sapolsky’nin Stanford Ünivers
 | `rehber.css`, `rehber.js` | Görünüm ve etkileşim; dış betik ya da kütüphane kullanmaz. |
 | `sekiller/` | 29 şekil (PNG). |
 | `tools/donustur.py` | Öğrenme notlarının Markdown metnini (3. sürüm) bu sayfaya çeviren betik. Markdown kaynak metni bu depoda yer almaz. |
-| `tools/ekler.py` | Web sürümüne eklenen güncel kanıt maddeleri, vaka soruları, ek kaynaklar ve simülasyon listesi. |
+| `tools/ekler.py` | Web sürümüne eklenen güncel kanıt maddeleri, vaka soruları, ek kaynaklar, simülasyon listesi ve simülasyon yönergeleri. |
+| `tools/vakalar.py` | Dallanan vaka simülasyonları (sahneler, seçenekler, puanlar, geri bildirimler); üretici her sahneye ulaşıldığını ve döngü olmadığını denetler. |
 
 ## Kaynak ve sorumluluk
 
